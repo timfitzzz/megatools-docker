@@ -1,5 +1,18 @@
-FROM debian:sid
+# syntax=docker/dockerfile:1
+FROM alpine:latest
 
-RUN apt-get update && apt-get install -y megatools
+# Deps
+RUN apk add --update build-base libtool automake autoconf pkgconfig \
+    glib glib-dev libcurl curl-dev asciidoc openssl-dev
+RUN apk add git meson ninja 
+
+# Build and Install
+RUN git clone https://megous.com/git/megatools && cd megatools && meson b && \
+    ninja -C b install
+
+# Purge
+RUN apk del build-base libtool automake autoconf pkgconfig glib-dev curl-dev \
+    asciidoc openssl-dev
+RUN apk del git meson ninja 
 ADD megaupload.sh /bin/megaupload
 ADD megasync.sh /bin/megasync
